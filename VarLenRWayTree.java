@@ -2,41 +2,37 @@ import java.io.File;
 import java.util.Arrays;
 
 public class VarLenRWayTree {
-    static final String alphas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    static final String radix = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-
-    static final File basePath = new File("C:\\Users\\Andrew\\Desktop\\testing");
+    private static final String ALPHAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String RADIX = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
 
     /**
      * creates R-way-like structure of directories, with first layer consisting of <code>alphas</code> and
      * the following - <code>radix</code>
      * @param depth - number of layers in the tree
+     * @param basePath - root directory
      */
-    static void build(int depth) {
+    static void build(int depth, final File basePath) {
         StringBuilder pathTemplateBuilder = new StringBuilder(3 * depth);
         for (int i = 0; i < depth; i++)
             pathTemplateBuilder.append("/%c");
-        String pathTemplate = pathTemplateBuilder.toString();
+        String pathTemplate = pathTemplateBuilder.append('/').toString();
         pathTemplateBuilder.setLength(0);
         final Character[] pathArgs = new Character[depth]; // hint to compiler to optimise 'length - 1'
-        final char radixMin = radix.charAt(0);
-        final char radixMax = radix.charAt(radix.length() - 1);
-        Arrays.fill(pathArgs, radixMin);
-        int[] pathArgsIndices = new int[depth];
+        Arrays.fill(pathArgs, RADIX.charAt(0));
+        final int[] pathArgsIndices = new int[depth];
 
-        for (int i = 0, currInd = depth - 1; i < alphas.length(); i++, currInd = depth - 1) {
-            pathArgs[0] = alphas.charAt(i);
+        for (int i = 0, currInd = depth - 1; i < ALPHAS.length(); i++, currInd = depth - 1) {
+            pathArgs[0] = ALPHAS.charAt(i);
             new File(basePath, String.format(pathTemplate, (Object[]) pathArgs)).mkdirs();
 
             while (currInd > 0) {
-                if (pathArgsIndices[currInd] == radix.length() - 1) {
-                    pathArgsIndices[currInd] = 0;
-                    pathArgs[currInd] = radixMin;
+                if (pathArgsIndices[currInd] == RADIX.length() - 1) {
+                    pathArgs[currInd] = RADIX.charAt(pathArgsIndices[currInd] = 0);
 
                     currInd--;
                     continue;
                 }
-                pathArgs[currInd] = radix.charAt(++pathArgsIndices[currInd]);
+                pathArgs[currInd] = RADIX.charAt(++pathArgsIndices[currInd]);
                 currInd = pathArgs.length - 1;
 
                 new File(basePath, String.format(pathTemplate, (Object[]) pathArgs)).mkdirs();
